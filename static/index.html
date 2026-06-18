@@ -580,8 +580,12 @@ createApp({
         const r = await this.apiPost('/api/keywords/random', { category: item.category, count });
         if (r && r.keywords && r.keywords.length) {
           item.values = r.keywords;
+        } else {
+          this.toastMsg('重抽失败，暂无更多词汇');
         }
-      } catch(e) { /* silent */ }
+      } catch(e) {
+        this.toastMsg('重抽请求失败，请刷新页面后重试');
+      }
     },
 
     async toggleKeywordSource() {
