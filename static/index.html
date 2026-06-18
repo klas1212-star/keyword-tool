@@ -180,10 +180,13 @@
                 <span class="links-disclaimer" style="font-size:11px;color:#94a3b8;font-weight:400">免责声明：本站仅收录整理网址，不对第三方网站内容负责</span>
               </div>
             </div>
-            <button class="btn-back-links" @click="showLinksPanel = false">返回灵感面板</button>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="search-input" v-model="linkSearchTerm" placeholder="搜索链接..." style="width:160px;padding:4px 8px;font-size:12px">
+              <button class="btn-back-links" @click="showLinksPanel = false">返回灵感面板</button>
+            </div>
           </div>
           <div class="links-body">
-            <div class="link-group" v-for="(links, groupName) in linkGroups" :key="groupName">
+            <div class="link-group" v-for="(links, groupName) in filteredLinkGroups" :key="groupName">
               <div class="link-group-title">{{ groupName }}</div>
               <div class="links-grid">
                 <a class="link-item" v-for="link in links" :key="link.url" :href="link.url" target="_blank" rel="noopener">
@@ -266,6 +269,7 @@
                   <div class="result-values">
                     <span class="result-value" v-for="v in item.values" :key="v">{{ v }}</span>
                   </div>
+                  <button class="reroll-btn" @click="rerollItem(r, item)" title="重新随机该项">&#x21bb;</button>
                 </div>
               </div>
             </template>
@@ -419,6 +423,7 @@ createApp({
       keywordSource: 'shared',
       showLinksPanel: false,
       showAnliPanel: false,
+      linkSearchTerm: '',
       managePassword: '',
       passVerified: false,
       showManage: false,
@@ -491,6 +496,18 @@ createApp({
       const q = this.keywordSearch.trim().toLowerCase();
       if (!q) return all;
       return all.filter(k => k.toLowerCase().includes(q));
+    },
+    filteredLinkGroups() {
+      const q = this.linkSearchTerm.trim().toLowerCase();
+      if (!q) return this.linkGroups;
+      const result = {};
+      for (const [groupName, links] of Object.entries(this.linkGroups)) {
+        const filtered = links.filter(l =>
+          l.name.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) || groupName.toLowerCase().includes(q)
+        );
+        if (filtered.length) result[groupName] = filtered;
+      }
+      return result;
     }
   },
 
@@ -555,6 +572,17 @@ createApp({
     },
 
     clearResults() { this.results = []; },
+
+    async rerollItem(result, item) {
+      if (!item.category) return;
+      const count = item.values.length;
+      try {
+        const r = await this.apiPost('/api/keywords/random', { category: item.category, count });
+        if (r && r.keywords && r.keywords.length) {
+          item.values = r.keywords;
+        }
+      } catch(e) { /* silent */ }
+    },
 
     async toggleKeywordSource() {
       const newSource = this.keywordSource === 'shared' ? 'default' : 'shared';

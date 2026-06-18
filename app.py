@@ -78,11 +78,11 @@ def generate_people(data):
     result = {"title": "人物灵感组合", "items": []}
 
     if male:
-        result["items"].append({"label": "男明星", "values": male})
+        result["items"].append({"label": "男明星", "category": "male_celebrities", "values": male})
     if female:
-        result["items"].append({"label": "女明星", "values": female})
+        result["items"].append({"label": "女明星", "category": "female_celebrities", "values": female})
     if styles:
-        result["items"].append({"label": "人物主题", "values": styles})
+        result["items"].append({"label": "人物主题", "category": "styles", "values": styles})
 
     return jsonify(result)
 
@@ -129,23 +129,53 @@ def generate_no_people(data):
 
     if materials:
         if era_labels:
+            # 混池：每个material来自不同era，存储各自的category
             result["items"].append({
                 "label": "素材",
+                "category": "mixed",
                 "values": [f"{m}{l}" for m, l in zip(materials, era_labels)]
             })
         else:
-            result["items"].append({"label": "素材", "values": materials})
+            result["items"].append({"label": "素材", "category": era_key, "values": materials})
 
     if color_count > 0 and colors:
-        result["items"].append({"label": "主色调", "values": colors})
+        result["items"].append({"label": "主色调", "category": "colors", "values": colors})
 
     # 古代模式可选诗句
     if era == "ancient" and poem_count > 0:
         poems = keyword_mgr.get_random_keywords("poems", poem_count)
         if poems:
-            result["items"].append({"label": "古诗歌词", "values": poems})
+            result["items"].append({"label": "古诗歌词", "category": "poems", "values": poems})
 
     return jsonify(result)
+
+
+@app.route("/api/keywords/random", methods=["POST"])
+def random_keyword():
+    """获取指定分类的随机关键词"""
+    data = request.get_json()
+    category = data.get("category", "")
+    count = int(data.get("count", 1))
+    count = max(1, min(count, 10))
+
+    if category == "mixed":
+        # 混池：从三个时代随机抽取
+        era_keys = list(ERA_KEYS.values())
+        results = []
+        for _ in range(count):
+            chosen = random.choice(era_keys)
+            kw = keyword_mgr.get_random_keywords(chosen, 1)
+            if kw:
+                name_map = {
+                    "ancient_materials": "(古代)",
+                    "republican_materials": "(民国)",
+                    "modern_materials": "(现代)"
+                }
+                results.append(kw[0] + name_map.get(chosen, ""))
+        return jsonify({"keywords": results})
+    else:
+        keywords = keyword_mgr.get_random_keywords(category, count)
+        return jsonify({"keywords": keywords})
 
 
 @app.route("/api/keywords/add", methods=["POST"])

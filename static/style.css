@@ -673,6 +673,28 @@ body {
     font-weight: 600;
 }
 
+.reroll-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all .2s;
+    margin-left: 2px;
+    line-height: 1;
+}
+.reroll-btn:hover {
+    background: #f1f5f9;
+    color: var(--primary);
+    transform: rotate(180deg);
+}
+
 .result-placeholder {
     display: inline-block;
     padding: 2px 12px;
