@@ -153,7 +153,7 @@
             <button class="mgmt-btn" @click="goToLinks">
               <span class="mgmt-btn-left">
                 <span class="mgmt-btn-icon cyan"><img src="/images/导航.png" alt=""></span>
-                <span>Links</span>
+                <span>常用导航</span>
               </span>
               <span class="mgmt-btn-arrow">&#x276f;</span>
             </button>
@@ -568,8 +568,8 @@ createApp({
       }
     },
 
-    goToLinks() { this.showLinksPanel = true; },
-    goToAnli() { this.showAnliPanel = true; },
+    goToLinks() { this.showLinksPanel = true; this.showAnliPanel = false; },
+    goToAnli() { this.showAnliPanel = true; this.showLinksPanel = false; },
     showAbout() { this.showAboutModal = true; },
 
     async openManage() {
