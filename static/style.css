@@ -1094,14 +1094,29 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ========== 响应式 ========== */
-@media (max-width: 960px) {
-    .app-container { padding: 16px; }
-    .main-content { flex-direction: column; }
-    .sidebar { width: 100%; }
-    .modal { width: 95%; }
+@media (max-width: 768px) {
+    body { overflow: auto; height: auto; }
+    .app-container { padding: 12px; height: auto; overflow: visible; min-height: 100vh; }
+    .header { margin-bottom: 16px; }
+    .header-left h1 { font-size: 22px; }
+    .header-subtitle { font-size: 12px; }
+    .main-content { flex-direction: column; flex: none; }
+    .sidebar { width: 100%; height: auto; flex: none; }
+    .sidebar-card-flex { flex: none; min-height: auto; }
+    .preview-panel { height: auto; flex: none; gap: 12px; overflow: visible; }
+    .right-card { min-height: 0; }
+    .preview-card { flex: none; min-height: 200px; max-height: 40vh; }
+    .result-card { flex: none; min-height: 200px; max-height: 50vh; }
+    .result-card .result-box { max-height: 40vh; }
+    .links-card { flex: none !important; min-height: 300px; max-height: 60vh; }
+    .links-card .links-body { max-height: 50vh; }
+    .links-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .modal { width: 95%; max-height: 90vh; }
     .manage-layout { flex-direction: column; height: auto; }
     .manage-left { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 10px; padding-right: 0; }
     .category-list { flex-direction: row; flex-wrap: wrap; gap: 4px; }
     .cat-item { font-size: 12px; padding: 6px 10px; }
     .search-input { width: 140px; }
+    .mode-options { flex-direction: row; flex-wrap: wrap; }
+    .mode-option { flex: 1 1 45%; }
 }
