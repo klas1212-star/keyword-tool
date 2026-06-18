@@ -152,8 +152,15 @@
             </button>
             <button class="mgmt-btn" @click="goToLinks">
               <span class="mgmt-btn-left">
-                <span class="mgmt-btn-icon cyan"><img src="/images/folder.png" alt=""></span>
-                <span>常用导航</span>
+                <span class="mgmt-btn-icon cyan"><img src="/images/导航.png" alt=""></span>
+                <span>Links</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+            <button class="mgmt-btn" @click="goToAnli">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon cyan"><img src="/images/安利墙.png" alt=""></span>
+                <span>自来水安利</span>
               </span>
               <span class="mgmt-btn-arrow">&#x276f;</span>
             </button>
@@ -195,8 +202,21 @@
           </div>
         </div>
 
+        <!-- 自来水安利卡片 -->
+        <div class="right-card links-card" v-if="showAnliPanel">
+          <div class="result-header">
+            <div class="result-header-left">
+              <span>自来水安利</span>
+            </div>
+            <button class="btn-back-links" @click="showAnliPanel = false">返回灵感面板</button>
+          </div>
+          <div class="links-body" style="display:flex;align-items:center;justify-content:center;min-height:200px;color:#94a3b8;font-size:14px">
+            暂无内容，敬请期待
+          </div>
+        </div>
+
         <!-- 词库预览卡片（非导航模式时显示） -->
-        <div class="right-card preview-card" v-if="!showLinksPanel">
+        <div class="right-card preview-card" v-if="!showLinksPanel && !showAnliPanel">
           <div class="preview-header">
             <div class="preview-tabs">
               <button v-for="(cat, key) in categories" :key="key" class="preview-tab"
@@ -220,7 +240,7 @@
         </div>
 
         <!-- 灵感结果卡片（非导航模式时显示） -->
-        <div class="right-card result-card" v-if="!showLinksPanel">
+        <div class="right-card result-card" v-if="!showLinksPanel && !showAnliPanel">
           <div class="result-header">
             <div class="result-title-bar">灵感结果</div>
           </div>
@@ -398,6 +418,7 @@ createApp({
       results: [],
       keywordSource: 'shared',
       showLinksPanel: false,
+      showAnliPanel: false,
       managePassword: '',
       passVerified: false,
       showManage: false,
@@ -548,6 +569,7 @@ createApp({
     },
 
     goToLinks() { this.showLinksPanel = true; },
+    goToAnli() { this.showAnliPanel = true; },
     showAbout() { this.showAboutModal = true; },
 
     async openManage() {
