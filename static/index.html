@@ -153,51 +153,12 @@
               </span>
               <span class="mgmt-btn-arrow">&#x276f;</span>
             </button>
-            <button class="mgmt-btn" @click="showLinks">
-              <span class="mgmt-btn-left">
-                <span class="mgmt-btn-icon cyan"><img src="/images/info.png" alt=""></span>
-                <span>常用导航</span>
-              </span>
-              <span class="mgmt-btn-arrow">&#x276f;</span>
-            </button>
           </div>
         </div>
       </aside>
 
       <!-- ===== 右侧面板 ===== -->
       <main class="preview-panel">
-        <!-- 常用导航面板 -->
-        <div class="right-card links-card" v-if="rightPanelMode === 'links'">
-          <div class="result-header">
-            <div class="result-header-left">
-              <div class="result-title-bar">常用导航</div>
-              <span class="links-disclaimer">免责声明：本站仅收录整理网址，不对第三方网站内容负责</span>
-            </div>
-            <button class="btn-back-links" @click="rightPanelMode = 'default'">&#x2190; 返回灵感面板</button>
-          </div>
-          <div class="links-body">
-            <template v-for="(group, gname) in linkGroups" :key="gname">
-              <div class="link-group">
-                <div class="link-group-title">{{ gname }}</div>
-                <div class="links-grid">
-                  <a class="link-item" v-for="link in group" :key="link.name" :href="link.url" target="_blank">
-                    <div class="link-icon">
-                      <img :src="getFavicon(link.url)" :alt="link.name" class="link-favicon">
-                    </div>
-                    <div class="link-info">
-                      <span class="link-name">{{ link.name }}</span>
-                      <span class="link-desc">{{ link.desc }}</span>
-                    </div>
-                    <span class="link-arrow">&#x2197;</span>
-                  </a>
-                </div>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <!-- 正常面板 -->
-        <template v-else>
         <!-- 词库预览卡片 -->
         <div class="right-card preview-card">
           <div class="preview-header">
@@ -257,7 +218,6 @@
             </template>
           </div>
         </div>
-        </template>
       </main>
     </div>
   </div>
@@ -379,6 +339,9 @@
           </ul>
         </div>
       </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" @click="showAboutModal = false">知道了</button>
+      </div>
     </div>
   </div>
   <div class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
@@ -404,50 +367,6 @@ createApp({
       selectedPreviewTags: [],
       params: { male: 1, female: 1, style: 1, material: 2, color: 1, poem: 0 },
       results: [],
-      rightPanelMode: 'default',
-      linkGroups: {
-        '免费可商网站': [
-          { name: 'Unsplash', url: 'https://unsplash.com/', icon: '📷', desc: '免费高清图片素材' },
-          { name: 'Pexels', url: 'https://www.pexels.com/zh-cn/', icon: '🖼️', desc: '免费图片和视频素材' },
-          { name: 'Pixabay', url: 'https://pixabay.com/zh/', icon: '🎞️', desc: '免费图片视频音乐' }
-        ],
-        '在线抠图类': [
-          { name: 'removebg', url: 'https://www.remove.bg/zh', icon: '🧹', desc: '一键在线抠图' },
-          { name: '佐糖', url: 'https://picwish.cn/', icon: '🍬', desc: 'AI 在线抠图修图' },
-          { name: '抠抠图', url: 'https://www.koukoutu.com/', icon: '✂️', desc: '在线智能抠图' }
-        ],
-        '免费字体': [
-          { name: '猫啃网', url: 'https://www.maoken.com/', icon: '🐱', desc: '免费商用字体下载' },
-          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', icon: '🔤', desc: '免费可商用字体下载' },
-          { name: 'Google Fonts', url: 'https://fonts.google.com/', icon: '�', desc: '谷歌开源免费字体' }
-        ],
-        '设计创意学习类': [
-          { name: '花瓣网', url: 'https://huaban.com/', icon: '🌸', desc: '国内大型灵感采集平台' },
-          { name: '站酷', url: 'https://www.zcool.com.cn/', icon: '�', desc: '设计师交流社区' },
-          { name: 'Pinterest', url: 'https://www.pinterest.com/', icon: '📌', desc: '全球创意图片灵感' }
-        ],
-        '配色参考类': [
-          { name: 'Color Hunt', url: 'https://colorhunt.co/', icon: '�', desc: '配色方案灵感库' },
-          { name: 'Coolors', url: 'https://coolors.co/', icon: '🎨', desc: '在线配色生成器' },
-          { name: '中国色', url: 'http://zhongguose.com/', icon: '�️', desc: '中国传统颜色' }
-        ],
-        '素材类': [
-          { name: 'Canva 可画', url: 'https://www.canva.cn/', icon: '✏️', desc: '在线设计工具与模板' },
-          { name: '创客贴', url: 'https://www.chuangkit.com/', icon: '�️', desc: '国内在线设计模板' }
-        ],
-        'AI工具类': [
-          { name: 'Midjourney', url: 'https://www.midjourney.com/', icon: '🤖', desc: 'AI 绘画工具' },
-          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', icon: '🎨', desc: '开源 AI 绘画' },
-          { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', icon: '✨', desc: '阿里 AI 创意绘画' },
-          { name: '文心一格', url: 'https://yige.baidu.com/', icon: '🖼️', desc: '百度 AI 绘画平台' }
-        ],
-        '黑科技': [
-          { name: 'Eagle', url: 'https://eagle.cool/', icon: '🦅', desc: '设计师素材管理工具' },
-          { name: '图片助手', url: 'https://www.pullywood.com/ImageAssistant/', icon: '🔍', desc: '网页图片批量提取插件' },
-          { name: '花瓣采集', url: 'https://huaban.com/about/goodies/', icon: '🧩', desc: '浏览器一键采集灵感插件' },
-          { name: 'uBlock Origin', url: 'https://ublockorigin.com/', icon: '🛡️', desc: '高效广告拦截浏览器插件' }
-        ]
-      },
       keywordSource: 'shared',
       managePassword: '',
       passVerified: false,
@@ -510,7 +429,6 @@ createApp({
 
     // ====== 生成灵感 ======
     async generate() {
-      this.rightPanelMode = 'default';
       const p = { mode: this.currentMode };
       if (this.currentMode === 'people') {
         p.male_count = this.params.male;
@@ -547,13 +465,6 @@ createApp({
     },
 
     showAbout() { this.showAboutModal = true; },
-
-    showLinks() { this.rightPanelMode = 'links'; },
-
-    getFavicon(url) {
-      // 使用 Google favicon 服务获取网站图标
-      return 'https://www.google.com/s2/favicons?sz=48&domain_url=' + encodeURIComponent(url);
-    },
 
     // ====== 管理弹窗 ======
     async openManage() {
