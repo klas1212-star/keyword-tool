@@ -7,8 +7,9 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 
 # 初始化关键词管理器（使用TXT文件存储）
 SHARED_FILE = "灵感词库.txt"       # 共享词库（会被修改）
-DEFAULT_FILE = "灵感词库_默认.txt"  # 默认词库（不变）
+DEFAULT_FILE = "灵感词库_默认.txt"  # 默认词库（永不改变，只读）
 keyword_mgr = KeywordManager(SHARED_FILE)
+shared_mgr = KeywordManager(SHARED_FILE)  # 增删操作始终走共享文件
 current_source = "shared"  # "shared" 或 "default"
 
 # 管理密码：删除词汇时需要，添加词汇无需密码
@@ -188,8 +189,11 @@ def add_keyword():
     if not category or not keyword:
         return jsonify({"success": False, "message": "分类和关键词不能为空"}), 400
 
-    success = keyword_mgr.add_keyword(category, keyword)
+    success = shared_mgr.add_keyword(category, keyword)
     if success:
+        # 如果当前正在查看共享词库，同步刷新
+        if current_source == "shared":
+            keyword_mgr.switch_file(SHARED_FILE)
         return jsonify({"success": True, "message": f"已添加: {keyword}"})
     else:
         return jsonify({"success": False, "message": "词汇已存在或无效"}), 400
@@ -209,8 +213,10 @@ def delete_keyword():
     if password != MANAGE_PASSWORD:
         return jsonify({"success": False, "message": "管理密码错误，无删除权限"}), 403
 
-    success = keyword_mgr.remove_keyword(category, keyword)
+    success = shared_mgr.remove_keyword(category, keyword)
     if success:
+        if current_source == "shared":
+            keyword_mgr.switch_file(SHARED_FILE)
         return jsonify({"success": True, "message": f"已删除: {keyword}"})
     else:
         return jsonify({"success": False, "message": "删除失败，词汇不存在"}), 400
