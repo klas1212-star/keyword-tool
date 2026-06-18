@@ -178,9 +178,9 @@
               <div class="link-group-title">{{ groupName }}</div>
               <div class="links-grid">
                 <a class="link-item" v-for="link in links" :key="link.url" :href="link.url" target="_blank" rel="noopener">
-                  <div class="link-icon" :style="{ background: link.color }">
+                  <div class="link-icon">
                     <img class="link-favicon" :src="'/images/favicons/' + link.domain + '.png'" :alt="link.name" @error="e => e.target.style.display='none'" @load="e => e.target.nextElementSibling.style.display='none'">
-                    <span class="link-letter">{{ link.name.charAt(0) }}</span>
+                    <span class="link-letter" :style="{ color: link.color }">{{ link.name.charAt(0) }}</span>
                   </div>
                   <div class="link-info">
                     <span class="link-name">{{ link.name }}</span>
