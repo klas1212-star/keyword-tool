@@ -168,8 +168,10 @@
         <div class="right-card links-card" v-if="showLinksPanel">
           <div class="result-header">
             <div class="result-header-left">
-              <div class="result-title-bar">常用导航</div>
-              <div class="links-disclaimer">免责声明：本站仅收录整理网址，不对第三方网站内容负责</div>
+              <div class="result-title-bar" style="display:flex;align-items:center;gap:12px">
+                <span>常用导航</span>
+                <span class="links-disclaimer" style="font-size:11px;color:#94a3b8;font-weight:400">免责声明：本站仅收录整理网址，不对第三方网站内容负责</span>
+              </div>
             </div>
             <button class="btn-back-links" @click="showLinksPanel = false">返回灵感面板</button>
           </div>
@@ -418,8 +420,8 @@ createApp({
         ],
         '免费字体': [
           { name: '猫啃网', url: 'https://www.maoken.com/', domain: 'maoken.com', color: '#a855f7', desc: '免费商用字体下载' },
-          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', domain: 'ziyouziti.com', color: '#d946ef', desc: '免费可商用字体大全' },
-          { name: 'Google Fonts', url: 'https://fonts.google.com/', domain: 'fonts.google.com', color: '#ec4899', desc: '谷歌开源免费字体' }
+          { name: '字由', url: 'https://www.hellofont.cn/', domain: 'hellofont.cn', color: '#d946ef', desc: '设计师字体管理工具' },
+          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', domain: 'ziyouziti.com', color: '#ec4899', desc: '免费可商用字体大全' }
         ],
         '设计创意学习类': [
           { name: '花瓣网', url: 'https://huaban.com/', domain: 'huaban.com', color: '#f43f5e', desc: '国内大型灵感采集平台' },
@@ -438,10 +440,12 @@ createApp({
           { name: '千库网', url: 'https://588ku.com/', domain: '588ku.com', color: '#a855f7', desc: '商用设计素材下载' }
         ],
         'AI工具类': [
-          { name: 'Midjourney', url: 'https://www.midjourney.com/', domain: 'midjourney.com', color: '#d946ef', desc: 'AI图像生成器' },
-          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', domain: 'stablediffusionweb.com', color: '#ec4899', desc: '开源AI绘画工具' },
           { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', domain: 'aliyun.com', color: '#f43f5e', desc: '阿里云AI图像生成' },
-          { name: '文心一格', url: 'https://yige.baidu.com/', domain: 'yige.baidu.com', color: '#f97316', desc: '百度AI艺术创作平台' }
+          { name: '文心一格', url: 'https://yige.baidu.com/', domain: 'yige.baidu.com', color: '#f97316', desc: '百度AI艺术创作平台' },
+          { name: '即梦', url: 'https://www.jimeng.ai/', domain: 'jimeng.ai', color: '#eab308', desc: '字节跳动AI图像生成' },
+          { name: '星流', url: 'https://www.xingliu.art/', domain: 'xingliu.art', color: '#22c55e', desc: 'AI绘画创作社区' },
+          { name: 'Midjourney', url: 'https://www.midjourney.com/', domain: 'midjourney.com', color: '#d946ef', desc: '海外AI图像生成器' },
+          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', domain: 'stablediffusionweb.com', color: '#ec4899', desc: '海外开源AI绘画工具' }
         ],
         '黑科技': [
           { name: 'Eagle', url: 'https://eagle.cool/', domain: 'eagle.cool', color: '#eab308', desc: '设计师素材管理工具' },
