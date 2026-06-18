@@ -178,9 +178,9 @@
               <div class="link-group-title">{{ groupName }}</div>
               <div class="links-grid">
                 <a class="link-item" v-for="link in links" :key="link.url" :href="link.url" target="_blank" rel="noopener">
-                  <div class="link-icon">
-                    <img class="link-favicon" :src="link.favicon" :alt="link.name" @error="e => e.target.style.display='none'">
-                    <span class="link-fallback">{{ link.name.charAt(0) }}</span>
+                  <div class="link-icon" :style="{ background: link.color }">
+                    <img class="link-favicon" :src="'/images/favicons/' + link.domain + '.png'" :alt="link.name" @error="e => e.target.style.display='none'">
+                    <span class="link-letter">{{ link.name.charAt(0) }}</span>
                   </div>
                   <div class="link-info">
                     <span class="link-name">{{ link.name }}</span>
@@ -407,50 +407,50 @@ createApp({
       toast: { show: false, message: '', timer: null },
       linkGroups: {
         '免费可商网站': [
-          { name: '花瓣网', url: 'https://huaban.com/', domain: 'huaban.com', favicon: '/images/favicons/huaban.com.png', desc: '国内大型灵感采集平台' },
-          { name: '站酷', url: 'https://www.zcool.com.cn/', domain: 'zcool.com.cn', favicon: '/images/favicons/zcool.com.cn.png', desc: '设计师交流社区' },
-          { name: 'Pinterest', url: 'https://www.pinterest.com/', domain: 'pinterest.com', favicon: '/images/favicons/pinterest.com.png', desc: '全球创意图片灵感' },
-          { name: 'Unsplash', url: 'https://unsplash.com/', domain: 'unsplash.com', favicon: '/images/favicons/unsplash.com.png', desc: '免费高清摄影图片' },
-          { name: 'Pixabay', url: 'https://pixabay.com/', domain: 'pixabay.com', favicon: '/images/favicons/pixabay.com.png', desc: '免费图片与素材库' },
-          { name: 'Pexels', url: 'https://www.pexels.com/', domain: 'pexels.com', favicon: '/images/favicons/pexels.com.png', desc: '免费高质量图片素材' }
+          { name: '花瓣网', url: 'https://huaban.com/', domain: 'huaban.com', color: '#f43f5e', desc: '国内大型灵感采集平台' },
+          { name: '站酷', url: 'https://www.zcool.com.cn/', domain: 'zcool.com.cn', color: '#f97316', desc: '设计师交流社区' },
+          { name: 'Pinterest', url: 'https://www.pinterest.com/', domain: 'pinterest.com', color: '#eab308', desc: '全球创意图片灵感' },
+          { name: 'Unsplash', url: 'https://unsplash.com/', domain: 'unsplash.com', color: '#22c55e', desc: '免费高清摄影图片' },
+          { name: 'Pixabay', url: 'https://pixabay.com/', domain: 'pixabay.com', color: '#14b8a6', desc: '免费图片与素材库' },
+          { name: 'Pexels', url: 'https://www.pexels.com/', domain: 'pexels.com', color: '#06b6d4', desc: '免费高质量图片素材' }
         ],
         '在线抠图类': [
-          { name: 'removebg', url: 'https://www.remove.bg/', domain: 'remove.bg', favicon: '/images/favicons/remove.bg.png', desc: '一键在线抠图' },
-          { name: '佐糖', url: 'https://zuotang.com/', domain: 'zuotang.com', favicon: '/images/favicons/zuotang.com.png', desc: '在线图片处理与抠图' },
-          { name: '抠抠图', url: 'https://www.koukoutu.com/', domain: 'koukoutu.com', favicon: '/images/favicons/koukoutu.com.png', desc: '智能在线抠图工具' }
+          { name: 'removebg', url: 'https://www.remove.bg/', domain: 'remove.bg', color: '#3b82f6', desc: '一键在线抠图' },
+          { name: '佐糖', url: 'https://zuotang.com/', domain: 'zuotang.com', color: '#6366f1', desc: '在线图片处理与抠图' },
+          { name: '抠抠图', url: 'https://www.koukoutu.com/', domain: 'koukoutu.com', color: '#8b5cf6', desc: '智能在线抠图工具' }
         ],
         '免费字体': [
-          { name: '猫啃网', url: 'https://www.maoken.com/', domain: 'maoken.com', favicon: '/images/favicons/maoken.com.png', desc: '免费商用字体下载' },
-          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', domain: 'ziyouziti.com', favicon: '/images/favicons/ziyouziti.com.png', desc: '免费可商用字体大全' },
-          { name: 'Google Fonts', url: 'https://fonts.google.com/', domain: 'fonts.google.com', favicon: '/images/favicons/fonts.google.com.png', desc: '谷歌开源免费字体' }
+          { name: '猫啃网', url: 'https://www.maoken.com/', domain: 'maoken.com', color: '#a855f7', desc: '免费商用字体下载' },
+          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', domain: 'ziyouziti.com', color: '#d946ef', desc: '免费可商用字体大全' },
+          { name: 'Google Fonts', url: 'https://fonts.google.com/', domain: 'fonts.google.com', color: '#ec4899', desc: '谷歌开源免费字体' }
         ],
         '设计创意学习类': [
-          { name: '站酷学习', url: 'https://edu.zcool.com.cn/', domain: 'edu.zcool.com.cn', favicon: '/images/favicons/edu.zcool.com.cn.png', desc: '设计课程学习平台' },
-          { name: '优设网', url: 'https://www.uisdc.com/', domain: 'uisdc.com', favicon: '/images/favicons/uisdc.com.png', desc: '设计师学习交流社区' }
+          { name: '站酷学习', url: 'https://edu.zcool.com.cn/', domain: 'edu.zcool.com.cn', color: '#f43f5e', desc: '设计课程学习平台' },
+          { name: '优设网', url: 'https://www.uisdc.com/', domain: 'uisdc.com', color: '#f97316', desc: '设计师学习交流社区' }
         ],
         '配色参考类': [
-          { name: 'Color Hunt', url: 'https://colorhunt.co/', domain: 'colorhunt.co', favicon: '/images/favicons/colorhunt.co.png', desc: '配色方案灵感库' },
-          { name: 'Coolors', url: 'https://coolors.co/', domain: 'coolors.co', favicon: '/images/favicons/coolors.co.png', desc: '配色方案生成器' },
-          { name: '中国色', url: 'http://zhongguose.com/', domain: 'zhongguose.com', favicon: '/images/favicons/zhongguose.com.png', desc: '中国传统颜色参考' }
+          { name: 'Color Hunt', url: 'https://colorhunt.co/', domain: 'colorhunt.co', color: '#eab308', desc: '配色方案灵感库' },
+          { name: 'Coolors', url: 'https://coolors.co/', domain: 'coolors.co', color: '#22c55e', desc: '配色方案生成器' },
+          { name: '中国色', url: 'http://zhongguose.com/', domain: 'zhongguose.com', color: '#14b8a6', desc: '中国传统颜色参考' }
         ],
         '素材类': [
-          { name: 'Canva 可画', url: 'https://www.canva.cn/', domain: 'canva.cn', favicon: '/images/favicons/canva.cn.png', desc: '在线设计工具与模板' },
-          { name: '创客贴', url: 'https://www.chuangkit.com/', domain: 'chuangkit.com', favicon: '/images/favicons/chuangkit.com.png', desc: '国内在线设计模板平台' },
-          { name: '觅元素', url: 'https://www.51yuansu.com/', domain: '51yuansu.com', favicon: '/images/favicons/51yuansu.com.png', desc: '原创设计素材下载' },
-          { name: '千图网', url: 'https://www.58pic.com/', domain: '58pic.com', favicon: '/images/favicons/58pic.com.png', desc: '精品设计素材库' },
-          { name: '千库网', url: 'https://588ku.com/', domain: '588ku.com', favicon: '/images/favicons/588ku.com.png', desc: '商用设计素材下载' }
+          { name: 'Canva 可画', url: 'https://www.canva.cn/', domain: 'canva.cn', color: '#06b6d4', desc: '在线设计工具与模板' },
+          { name: '创客贴', url: 'https://www.chuangkit.com/', domain: 'chuangkit.com', color: '#3b82f6', desc: '国内在线设计模板平台' },
+          { name: '觅元素', url: 'https://www.51yuansu.com/', domain: '51yuansu.com', color: '#6366f1', desc: '原创设计素材下载' },
+          { name: '千图网', url: 'https://www.58pic.com/', domain: '58pic.com', color: '#8b5cf6', desc: '精品设计素材库' },
+          { name: '千库网', url: 'https://588ku.com/', domain: '588ku.com', color: '#a855f7', desc: '商用设计素材下载' }
         ],
         'AI工具类': [
-          { name: 'Midjourney', url: 'https://www.midjourney.com/', domain: 'midjourney.com', favicon: '/images/favicons/midjourney.com.png', desc: 'AI图像生成器' },
-          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', domain: 'stablediffusionweb.com', favicon: '/images/favicons/stablediffusionweb.com.png', desc: '开源AI绘画工具' },
-          { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', domain: 'aliyun.com', favicon: '/images/favicons/aliyun.com.png', desc: '阿里云AI图像生成' },
-          { name: '文心一格', url: 'https://yige.baidu.com/', domain: 'yige.baidu.com', favicon: '/images/favicons/yige.baidu.com.png', desc: '百度AI艺术创作平台' }
+          { name: 'Midjourney', url: 'https://www.midjourney.com/', domain: 'midjourney.com', color: '#d946ef', desc: 'AI图像生成器' },
+          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', domain: 'stablediffusionweb.com', color: '#ec4899', desc: '开源AI绘画工具' },
+          { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', domain: 'aliyun.com', color: '#f43f5e', desc: '阿里云AI图像生成' },
+          { name: '文心一格', url: 'https://yige.baidu.com/', domain: 'yige.baidu.com', color: '#f97316', desc: '百度AI艺术创作平台' }
         ],
         '黑科技': [
-          { name: 'Eagle', url: 'https://eagle.cool/', domain: 'eagle.cool', favicon: '/images/favicons/eagle.cool.png', desc: '设计师素材管理工具' },
-          { name: '图片助手', url: 'https://www.pullywood.com/ImageAssistant/', domain: 'pullywood.com', favicon: '/images/favicons/pullywood.com.png', desc: '网页图片批量提取插件' },
-          { name: '花瓣采集', url: 'https://huaban.com/about/goodies/', domain: 'huaban.com', favicon: '/images/favicons/huaban.com.png', desc: '浏览器一键采集插件' },
-          { name: 'uBlock Origin', url: 'https://ublockorigin.com/', domain: 'ublockorigin.com', favicon: '/images/favicons/ublockorigin.com.png', desc: '高效广告拦截插件' }
+          { name: 'Eagle', url: 'https://eagle.cool/', domain: 'eagle.cool', color: '#eab308', desc: '设计师素材管理工具' },
+          { name: '图片助手', url: 'https://www.pullywood.com/ImageAssistant/', domain: 'pullywood.com', color: '#22c55e', desc: '网页图片批量提取插件' },
+          { name: '花瓣采集', url: 'https://huaban.com/about/goodies/', domain: 'huaban.com', color: '#14b8a6', desc: '浏览器一键采集插件' },
+          { name: 'uBlock Origin', url: 'https://ublockorigin.com/', domain: 'ublockorigin.com', color: '#06b6d4', desc: '高效广告拦截插件' }
         ]
       }
     };
