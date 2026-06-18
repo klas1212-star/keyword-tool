@@ -10,7 +10,7 @@
 <body>
 <div id="app">
   <div class="app-container">
-    <!-- ========== 顶部标题栏（右上装饰由 bg.png 提供） ========== -->
+    <!-- ========== 顶部标题栏 ========== -->
     <header class="header">
       <div class="header-left">
         <h1>美工灵感生成器</h1>
@@ -49,7 +49,6 @@
         <div class="sidebar-card">
           <div class="sidebar-card-title">参数设置</div>
           <div class="param-group">
-            <!-- 人物图参数 -->
             <template v-if="currentMode === 'people'">
               <div class="param-row">
                 <label>男明星</label>
@@ -79,8 +78,6 @@
                 <span class="param-unit">个</span>
               </div>
             </template>
-
-            <!-- 无人物图参数 -->
             <template v-else>
               <div class="era-tabs">
                 <button v-for="era in eras" :key="era.key" class="era-tab"
@@ -153,14 +150,50 @@
               </span>
               <span class="mgmt-btn-arrow">&#x276f;</span>
             </button>
+            <button class="mgmt-btn" @click="goToLinks">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon cyan"><img src="/images/folder.png" alt=""></span>
+                <span>常用导航</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
           </div>
         </div>
       </aside>
 
       <!-- ===== 右侧面板 ===== -->
       <main class="preview-panel">
-        <!-- 词库预览卡片 -->
-        <div class="right-card preview-card">
+
+        <!-- 常用导航卡片（点击常用导航后显示） -->
+        <div class="right-card links-card" v-if="showLinksPanel">
+          <div class="result-header">
+            <div class="result-header-left">
+              <div class="result-title-bar">常用导航</div>
+              <div class="links-disclaimer">免责声明：本站仅收录整理网址，不对第三方网站内容负责</div>
+            </div>
+            <button class="btn-back-links" @click="showLinksPanel = false">返回灵感面板</button>
+          </div>
+          <div class="links-body">
+            <div class="link-group" v-for="(links, groupName) in linkGroups" :key="groupName">
+              <div class="link-group-title">{{ groupName }}</div>
+              <div class="links-grid">
+                <a class="link-item" v-for="link in links" :key="link.url" :href="link.url" target="_blank" rel="noopener">
+                  <div class="link-icon">
+                    <img class="link-favicon" :src="'https://www.google.com/s2/favicons?domain=' + link.domain + '&sz=64'" :alt="link.name">
+                  </div>
+                  <div class="link-info">
+                    <span class="link-name">{{ link.name }}</span>
+                    <span class="link-desc">{{ link.desc }}</span>
+                  </div>
+                  <span class="link-arrow">&#x2197;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 词库预览卡片（非导航模式时显示） -->
+        <div class="right-card preview-card" v-if="!showLinksPanel">
           <div class="preview-header">
             <div class="preview-tabs">
               <button v-for="(cat, key) in categories" :key="key" class="preview-tab"
@@ -183,13 +216,12 @@
           </div>
         </div>
 
-        <!-- 灵感结果卡片 -->
-        <div class="right-card result-card">
+        <!-- 灵感结果卡片（非导航模式时显示） -->
+        <div class="right-card result-card" v-if="!showLinksPanel">
           <div class="result-header">
             <div class="result-title-bar">灵感结果</div>
           </div>
           <div class="result-box" ref="resultBox">
-            <!-- 空状态 -->
             <div class="result-empty" v-if="results.length === 0">
               <div class="empty-cube-wrap">
                 <div class="empty-cube">
@@ -203,8 +235,6 @@
               </div>
               <p class="empty-text">点击【生成灵感】按钮获取随机组合</p>
             </div>
-
-            <!-- 结果列表 -->
             <template v-for="(r, idx) in results" :key="idx">
               <div class="result-block">
                 <div class="result-block-title">{{ r.title }}</div>
@@ -230,12 +260,10 @@
         <button class="modal-close" @click="showManage = false; loadCategories()">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- 共享词库提示 -->
         <div class="manage-tip-row">
           <span>&#x1f4a1;</span>
           <span>本词库为所有用户共享，添加词语无需审批，但删除操作请联系管理员。请大家共同维护，请勿添加无关或不合适的内容，谢谢配合～</span>
         </div>
-        <!-- 密码验证区：仅删除需要 -->
         <div class="manage-pwd-row" v-if="!passVerified">
           <span class="manage-pwd-label">删除密码:</span>
           <input type="password" class="manage-pwd-input" v-model="managePassword" placeholder="删除词汇需输入管理密码"
@@ -339,11 +367,9 @@
           </ul>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" @click="showAboutModal = false">知道了</button>
-      </div>
     </div>
   </div>
+
   <div class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
 </div>
 
@@ -368,6 +394,7 @@ createApp({
       params: { male: 1, female: 1, style: 1, material: 2, color: 1, poem: 0 },
       results: [],
       keywordSource: 'shared',
+      showLinksPanel: false,
       managePassword: '',
       passVerified: false,
       showManage: false,
@@ -376,7 +403,55 @@ createApp({
       mgrCat: '',
       mgrSelKw: '',
       addKeywordText: '',
-      toast: { show: false, message: '', timer: null }
+      toast: { show: false, message: '', timer: null },
+      linkGroups: {
+        '免费可商网站': [
+          { name: '花瓣网', url: 'https://huaban.com/', domain: 'huaban.com', desc: '国内大型灵感采集平台' },
+          { name: '站酷', url: 'https://www.zcool.com.cn/', domain: 'zcool.com.cn', desc: '设计师交流社区' },
+          { name: 'Pinterest', url: 'https://www.pinterest.com/', domain: 'pinterest.com', desc: '全球创意图片灵感' },
+          { name: 'Unsplash', url: 'https://unsplash.com/', domain: 'unsplash.com', desc: '免费高清摄影图片' },
+          { name: 'Pixabay', url: 'https://pixabay.com/', domain: 'pixabay.com', desc: '免费图片与素材库' },
+          { name: 'Pexels', url: 'https://www.pexels.com/', domain: 'pexels.com', desc: '免费高质量图片素材' }
+        ],
+        '在线抠图类': [
+          { name: 'removebg', url: 'https://www.remove.bg/', domain: 'remove.bg', desc: '一键在线抠图' },
+          { name: '佐糖', url: 'https://zuotang.com/', domain: 'zuotang.com', desc: '在线图片处理与抠图' },
+          { name: '抠抠图', url: 'https://www.koukoutu.com/', domain: 'koukoutu.com', desc: '智能在线抠图工具' }
+        ],
+        '免费字体': [
+          { name: '猫啃网', url: 'https://www.maoken.com/', domain: 'maoken.com', desc: '免费商用字体下载' },
+          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', domain: 'ziyouziti.com', desc: '免费可商用字体大全' },
+          { name: 'Google Fonts', url: 'https://fonts.google.com/', domain: 'fonts.google.com', desc: '谷歌开源免费字体' }
+        ],
+        '设计创意学习类': [
+          { name: '站酷学习', url: 'https://edu.zcool.com.cn/', domain: 'edu.zcool.com.cn', desc: '设计课程学习平台' },
+          { name: '优设网', url: 'https://www.uisdc.com/', domain: 'uisdc.com', desc: '设计师学习交流社区' }
+        ],
+        '配色参考类': [
+          { name: 'Color Hunt', url: 'https://colorhunt.co/', domain: 'colorhunt.co', desc: '配色方案灵感库' },
+          { name: 'Coolors', url: 'https://coolors.co/', domain: 'coolors.co', desc: '配色方案生成器' },
+          { name: '中国色', url: 'http://zhongguose.com/', domain: 'zhongguose.com', desc: '中国传统颜色参考' }
+        ],
+        '素材类': [
+          { name: 'Canva 可画', url: 'https://www.canva.cn/', domain: 'canva.cn', desc: '在线设计工具与模板' },
+          { name: '创客贴', url: 'https://www.chuangkit.com/', domain: 'chuangkit.com', desc: '国内在线设计模板平台' },
+          { name: '觅元素', url: 'https://www.51yuansu.com/', domain: '51yuansu.com', desc: '原创设计素材下载' },
+          { name: '千图网', url: 'https://www.58pic.com/', domain: '58pic.com', desc: '精品设计素材库' },
+          { name: '千库网', url: 'https://588ku.com/', domain: '588ku.com', desc: '商用设计素材下载' }
+        ],
+        'AI工具类': [
+          { name: 'Midjourney', url: 'https://www.midjourney.com/', domain: 'midjourney.com', desc: 'AI图像生成器' },
+          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', domain: 'stablediffusionweb.com', desc: '开源AI绘画工具' },
+          { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', domain: 'aliyun.com', desc: '阿里云AI图像生成' },
+          { name: '文心一格', url: 'https://yige.baidu.com/', domain: 'yige.baidu.com', desc: '百度AI艺术创作平台' }
+        ],
+        '黑科技': [
+          { name: 'Eagle', url: 'https://eagle.cool/', domain: 'eagle.cool', desc: '设计师素材管理工具' },
+          { name: '图片助手', url: 'https://www.pullywood.com/ImageAssistant/', domain: 'pullywood.com', desc: '网页图片批量提取插件' },
+          { name: '花瓣采集', url: 'https://huaban.com/about/goodies/', domain: 'huaban.com', desc: '浏览器一键采集插件' },
+          { name: 'uBlock Origin', url: 'https://ublockorigin.com/', domain: 'ublockorigin.com', desc: '高效广告拦截插件' }
+        ]
+      }
     };
   },
 
@@ -427,7 +502,6 @@ createApp({
       else this.selectedPreviewTags.push(kw);
     },
 
-    // ====== 生成灵感 ======
     async generate() {
       const p = { mode: this.currentMode };
       if (this.currentMode === 'people') {
@@ -440,6 +514,7 @@ createApp({
         p.color_count = this.params.color;
         if (this.currentEra === 'ancient') p.poem_count = this.params.poem;
       }
+      this.showLinksPanel = false;
       const r = await this.apiPost('/api/generate', p);
       if (r && r.title) {
         this.results.push(r);
@@ -464,9 +539,9 @@ createApp({
       }
     },
 
+    goToLinks() { this.showLinksPanel = true; },
     showAbout() { this.showAboutModal = true; },
 
-    // ====== 管理弹窗 ======
     async openManage() {
       this.categories = await this.apiGet('/api/categories');
       const keys = Object.keys(this.categories);
