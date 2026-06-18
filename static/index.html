@@ -579,7 +579,10 @@ createApp({
       try {
         const r = await this.apiPost('/api/keywords/random', { category: item.category, count });
         if (r && r.keywords && r.keywords.length) {
-          item.values = r.keywords;
+          const idx = result.items.indexOf(item);
+          if (idx >= 0) {
+            result.items.splice(idx, 1, { ...item, values: r.keywords });
+          }
         } else {
           this.toastMsg('重抽失败，暂无更多词汇');
         }
