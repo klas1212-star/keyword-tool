@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美工灵感生成器</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+  <div class="app-container">
+    <!-- ========== 顶部标题栏（右上装饰由 bg.png 提供） ========== -->
+    <header class="header">
+      <div class="header-left">
+        <h1>美工灵感生成器</h1>
+        <p class="header-subtitle">智能激发创意灵感，一键生成视觉组合</p>
+      </div>
+    </header>
+
+    <!-- ========== 主内容区 ========== -->
+    <div class="main-content">
+      <!-- ===== 左侧侧边栏 ===== -->
+      <aside class="sidebar">
+        <!-- 1. 作图类型 -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">作图类型</div>
+          <div class="mode-options">
+            <div class="mode-option" :class="{ active: currentMode === 'no_people' }"
+                 @click="currentMode = 'no_people'">
+              <div class="mode-icon"><img src="/images/landscape.png" alt=""></div>
+              <div class="mode-info">
+                <span class="mode-name">无人物图</span>
+                <span class="mode-desc">生成无人物场景灵感词</span>
+              </div>
+            </div>
+            <div class="mode-option" :class="{ active: currentMode === 'people' }"
+                 @click="currentMode = 'people'">
+              <div class="mode-icon"><img src="/images/person.png" alt=""></div>
+              <div class="mode-info">
+                <span class="mode-name">人物图</span>
+                <span class="mode-desc">生成人物相关场景灵感词</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 参数设置 -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">参数设置</div>
+          <div class="param-group">
+            <!-- 人物图参数 -->
+            <template v-if="currentMode === 'people'">
+              <div class="param-row">
+                <label>男明星</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.male = Math.max(0, params.male - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.male" min="0" max="10">
+                  <button class="spinner-btn" @click="params.male = Math.min(10, params.male + 1)">+</button>
+                </div>
+                <span class="param-unit">个</span>
+              </div>
+              <div class="param-row">
+                <label>女明星</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.female = Math.max(0, params.female - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.female" min="0" max="10">
+                  <button class="spinner-btn" @click="params.female = Math.min(10, params.female + 1)">+</button>
+                </div>
+                <span class="param-unit">个</span>
+              </div>
+              <div class="param-row">
+                <label>人物主题</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.style = Math.max(0, params.style - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.style" min="0" max="5">
+                  <button class="spinner-btn" @click="params.style = Math.min(5, params.style + 1)">+</button>
+                </div>
+                <span class="param-unit">个</span>
+              </div>
+            </template>
+
+            <!-- 无人物图参数 -->
+            <template v-else>
+              <div class="era-tabs">
+                <button v-for="era in eras" :key="era.key" class="era-tab"
+                  :class="{ active: currentEra === era.key }"
+                  @click="currentEra = era.key">{{ era.label }}</button>
+              </div>
+              <div class="param-row">
+                <label>素材数量</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.material = Math.max(0, params.material - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.material" min="0" max="10">
+                  <button class="spinner-btn" @click="params.material = Math.min(10, params.material + 1)">+</button>
+                </div>
+                <span class="param-unit">个</span>
+              </div>
+              <div class="param-row">
+                <label>主色调</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.color = Math.max(0, params.color - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.color" min="0" max="8">
+                  <button class="spinner-btn" @click="params.color = Math.min(8, params.color + 1)">+</button>
+                </div>
+                <span class="param-unit">个</span>
+              </div>
+              <div class="param-row" v-if="currentEra === 'ancient'">
+                <label>古诗歌词</label>
+                <div class="spinner">
+                  <button class="spinner-btn" @click="params.poem = Math.max(0, params.poem - 1)">−</button>
+                  <input class="spinner-value" v-model.number="params.poem" min="0" max="3">
+                  <button class="spinner-btn" @click="params.poem = Math.min(3, params.poem + 1)">+</button>
+                </div>
+                <span class="param-unit">句</span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 3. 生成按钮 -->
+        <button class="btn-generate" @click="generate">&#x279c; 生成灵感</button>
+
+        <!-- 4. 词库管理 -->
+        <div class="sidebar-card sidebar-card-flex">
+          <div class="sidebar-card-title">词库管理</div>
+          <div class="mgmt-btns">
+            <button class="mgmt-btn" @click="openManage">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon green"><img src="/images/folder.png" alt=""></span>
+                <span>管理词库</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+            <button class="mgmt-btn" @click="toggleKeywordSource">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon blue"><img src="/images/refresh.png" alt=""></span>
+                <span>{{ keywordSource === 'shared' ? '加载默认词库' : '加载共享词库' }}</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+            <button class="mgmt-btn" @click="clearResults">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon orange"><img src="/images/trash.png" alt=""></span>
+                <span>清空所有结果</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+            <button class="mgmt-btn" @click="showAbout">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon purple"><img src="/images/info.png" alt=""></span>
+                <span>使用须知</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+            <button class="mgmt-btn" @click="showLinks">
+              <span class="mgmt-btn-left">
+                <span class="mgmt-btn-icon cyan"><img src="/images/info.png" alt=""></span>
+                <span>常用导航</span>
+              </span>
+              <span class="mgmt-btn-arrow">&#x276f;</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ===== 右侧面板 ===== -->
+      <main class="preview-panel">
+        <!-- 常用导航面板 -->
+        <div class="right-card links-card" v-if="rightPanelMode === 'links'">
+          <div class="result-header">
+            <div class="result-header-left">
+              <div class="result-title-bar">常用导航</div>
+              <span class="links-disclaimer">免责声明：本站仅收录整理网址，不对第三方网站内容负责</span>
+            </div>
+            <button class="btn-back-links" @click="rightPanelMode = 'default'">&#x2190; 返回灵感面板</button>
+          </div>
+          <div class="links-body">
+            <template v-for="(group, gname) in linkGroups" :key="gname">
+              <div class="link-group">
+                <div class="link-group-title">{{ gname }}</div>
+                <div class="links-grid">
+                  <a class="link-item" v-for="link in group" :key="link.name" :href="link.url" target="_blank">
+                    <div class="link-icon">
+                      <img :src="getFavicon(link.url)" :alt="link.name" class="link-favicon">
+                    </div>
+                    <div class="link-info">
+                      <span class="link-name">{{ link.name }}</span>
+                      <span class="link-desc">{{ link.desc }}</span>
+                    </div>
+                    <span class="link-arrow">&#x2197;</span>
+                  </a>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 正常面板 -->
+        <template v-else>
+        <!-- 词库预览卡片 -->
+        <div class="right-card preview-card">
+          <div class="preview-header">
+            <div class="preview-tabs">
+              <button v-for="(cat, key) in categories" :key="key" class="preview-tab"
+                :class="{ active: activeTab === key }" @click="activeTab = key">
+                {{ cat.name }}
+              </button>
+            </div>
+          </div>
+          <div class="preview-meta" v-if="activeTab && categories[activeTab]">
+            <span>{{ categories[activeTab].name }}列表 · 共 <strong>{{ filteredKeywords.length }}</strong> 个</span>
+            <div class="search-box">
+              <input class="search-input" v-model="keywordSearch" placeholder="搜索素材关键词...">
+              <span class="search-icon">&#x1f50d;</span>
+            </div>
+          </div>
+          <div class="keyword-cloud" v-if="activeTab">
+            <span class="keyword-tag" v-for="kw in filteredKeywords" :key="kw"
+              :class="{ selected: selectedPreviewTags.includes(kw) }"
+              @click="togglePreviewTag(kw)">{{ kw }}</span>
+          </div>
+        </div>
+
+        <!-- 灵感结果卡片 -->
+        <div class="right-card result-card">
+          <div class="result-header">
+            <div class="result-title-bar">灵感结果</div>
+          </div>
+          <div class="result-box" ref="resultBox">
+            <!-- 空状态 -->
+            <div class="result-empty" v-if="results.length === 0">
+              <div class="empty-cube-wrap">
+                <div class="empty-cube">
+                  <div class="empty-cube-face empty-cube-front"></div>
+                  <div class="empty-cube-face empty-cube-back"></div>
+                  <div class="empty-cube-face empty-cube-left"></div>
+                  <div class="empty-cube-face empty-cube-right"></div>
+                  <div class="empty-cube-face empty-cube-top"></div>
+                  <div class="empty-cube-face empty-cube-bottom"></div>
+                </div>
+              </div>
+              <p class="empty-text">点击【生成灵感】按钮获取随机组合</p>
+            </div>
+
+            <!-- 结果列表 -->
+            <template v-for="(r, idx) in results" :key="idx">
+              <div class="result-block">
+                <div class="result-block-title">{{ r.title }}</div>
+                <div class="result-row" v-for="item in r.items" :key="item.label">
+                  <span class="result-label">{{ item.label }}:</span>
+                  <div class="result-values">
+                    <span class="result-value" v-for="v in item.values" :key="v">{{ v }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        </template>
+      </main>
+    </div>
+  </div>
+
+  <!-- ========== 词库管理弹窗 ========== -->
+  <div class="modal-overlay" v-if="showManage" @click.self="showManage = false; loadCategories()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>词库管理</h3>
+        <button class="modal-close" @click="showManage = false; loadCategories()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 共享词库提示 -->
+        <div class="manage-tip-row">
+          <span>&#x1f4a1;</span>
+          <span>本词库为所有用户共享，添加词语无需审批，但删除操作请联系管理员。请大家共同维护，请勿添加无关或不合适的内容，谢谢配合～</span>
+        </div>
+        <!-- 密码验证区：仅删除需要 -->
+        <div class="manage-pwd-row" v-if="!passVerified">
+          <span class="manage-pwd-label">删除密码:</span>
+          <input type="password" class="manage-pwd-input" v-model="managePassword" placeholder="删除词汇需输入管理密码"
+            @keyup.enter="verifyPassword">
+          <button class="btn btn-warning btn-sm" @click="verifyPassword">验证</button>
+        </div>
+        <div class="manage-pwd-row manage-pwd-ok" v-else>
+          <span>&#x2705; 删除权限已验证</span>
+          <button class="btn btn-default btn-xs" @click="passVerified = false; managePassword = ''">退出</button>
+        </div>
+        <div class="manage-layout">
+          <div class="manage-left">
+            <h4>词库分类</h4>
+            <ul class="category-list">
+              <li v-for="(cat, key) in categories" :key="key" class="cat-item"
+                :class="{ active: mgrCat === key }"
+                @click="mgrCat = key; mgrSelKw = ''">
+                {{ cat.name }}
+                <small style="color:inherit;opacity:0.6">({{ cat.count }})</small>
+              </li>
+            </ul>
+          </div>
+          <div class="manage-right">
+            <div class="manage-toolbar" v-if="mgrCat && categories[mgrCat]">
+              <span class="manage-toolbar-title">当前分类: {{ categories[mgrCat].name }}</span>
+              <span class="manage-toolbar-count">总数: {{ categories[mgrCat].count }} 个</span>
+            </div>
+            <div class="manage-toolbar" v-else>
+              <span class="manage-toolbar-title" style="color:#94a3b8">请在左侧选择分类</span>
+            </div>
+            <div class="manage-list-wrap">
+              <ul class="kw-list" v-if="mgrCat && categories[mgrCat]">
+                <li v-for="kw in categories[mgrCat].keywords" :key="kw" class="kw-item"
+                  :class="{ selected: mgrSelKw === kw }"
+                  @click="mgrSelKw = kw">{{ kw }}</li>
+              </ul>
+              <div class="manage-placeholder" v-else>请在左侧选择一个分类</div>
+            </div>
+            <div class="manage-actions-row">
+              <button class="btn btn-success btn-sm" :disabled="!mgrCat" @click="openAdd">添加词汇</button>
+              <button class="btn btn-warning btn-sm" :disabled="!mgrSelKw" @click="deleteKw">删除选中</button>
+              <button class="btn btn-default btn-sm" @click="loadManageData">刷新</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 添加词汇弹窗 ========== -->
+  <div class="modal-overlay" v-if="showAdd" @click.self="showAdd = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>添加词汇</h3>
+        <button class="modal-close" @click="showAdd = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="form-label" v-if="mgrCat && categories[mgrCat]">
+          向【{{ categories[mgrCat].name }}】词库添加新词汇:
+        </p>
+        <input type="text" class="form-input" v-model="addKeywordText" placeholder="请输入新词汇"
+          @keyup.enter="confirmAdd" ref="addInput">
+        <div class="modal-footer">
+          <button class="btn btn-default" @click="showAdd = false">取消</button>
+          <button class="btn btn-primary" @click="confirmAdd">确定添加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 使用须知弹窗 ========== -->
+  <div class="modal-overlay" v-if="showAboutModal" @click.self="showAboutModal = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>使用须知</h3>
+        <button class="modal-close" @click="showAboutModal = false">&times;</button>
+      </div>
+      <div class="modal-body about-body">
+        <div class="about-section">
+          <div class="about-icon">&#x2728;</div>
+          <h4>美工灵感生成器</h4>
+          <p>轻量级创意灵感工具，智能激发视觉设计灵感。</p>
+        </div>
+        <div class="about-rules">
+          <h5>&#x1f4cc; 使用说明</h5>
+          <ul>
+            <li>左侧选择作图类型与参数，点击「生成灵感」即可随机组合关键词</li>
+            <li>词库预览区可浏览、搜索、点击选中素材标签</li>
+            <li>灵感结果区展示所有已生成的组合结果，支持累积多条</li>
+          </ul>
+          <h5>&#x1f4cc; 词库说明</h5>
+          <ul>
+            <li>所有用户<strong>共享同一套词库</strong>，添加词汇无需权限</li>
+            <li>删除词汇需联系管理员获取密码</li>
+            <li>请不要添加奇怪或不合适的词语，共同维护词库质量</li>
+            <li>如需恢复默认词库，点击「加载默认词库」按钮即可</li>
+          </ul>
+          <h5>&#x1f4cc; 联系反馈</h5>
+          <ul>
+            <li>如有问题或建议，请联系 QQ：3341158628</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
+</div>
+
+<script>
+const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
+
+createApp({
+  data() {
+    return {
+      currentMode: 'no_people',
+      currentEra: 'ancient',
+      eras: [
+        { key: 'ancient', label: '古代' },
+        { key: 'republican', label: '民国' },
+        { key: 'modern', label: '现代' },
+        { key: 'mixed', label: '混池' }
+      ],
+      categories: {},
+      activeTab: '',
+      keywordSearch: '',
+      selectedPreviewTags: [],
+      params: { male: 1, female: 1, style: 1, material: 2, color: 1, poem: 0 },
+      results: [],
+      rightPanelMode: 'default',
+      linkGroups: {
+        '免费可商网站': [
+          { name: 'Unsplash', url: 'https://unsplash.com/', icon: '📷', desc: '免费高清图片素材' },
+          { name: 'Pexels', url: 'https://www.pexels.com/zh-cn/', icon: '🖼️', desc: '免费图片和视频素材' },
+          { name: 'Pixabay', url: 'https://pixabay.com/zh/', icon: '🎞️', desc: '免费图片视频音乐' }
+        ],
+        '在线抠图类': [
+          { name: 'removebg', url: 'https://www.remove.bg/zh', icon: '🧹', desc: '一键在线抠图' },
+          { name: '佐糖', url: 'https://picwish.cn/', icon: '🍬', desc: 'AI 在线抠图修图' },
+          { name: '抠抠图', url: 'https://www.koukoutu.com/', icon: '✂️', desc: '在线智能抠图' }
+        ],
+        '免费字体': [
+          { name: '猫啃网', url: 'https://www.maoken.com/', icon: '🐱', desc: '免费商用字体下载' },
+          { name: '自由字体', url: 'https://ziyouziti.com/index-index-all.html', icon: '🔤', desc: '免费可商用字体下载' },
+          { name: 'Google Fonts', url: 'https://fonts.google.com/', icon: '�', desc: '谷歌开源免费字体' }
+        ],
+        '设计创意学习类': [
+          { name: '花瓣网', url: 'https://huaban.com/', icon: '🌸', desc: '国内大型灵感采集平台' },
+          { name: '站酷', url: 'https://www.zcool.com.cn/', icon: '�', desc: '设计师交流社区' },
+          { name: 'Pinterest', url: 'https://www.pinterest.com/', icon: '📌', desc: '全球创意图片灵感' }
+        ],
+        '配色参考类': [
+          { name: 'Color Hunt', url: 'https://colorhunt.co/', icon: '�', desc: '配色方案灵感库' },
+          { name: 'Coolors', url: 'https://coolors.co/', icon: '🎨', desc: '在线配色生成器' },
+          { name: '中国色', url: 'http://zhongguose.com/', icon: '�️', desc: '中国传统颜色' }
+        ],
+        '素材类': [
+          { name: 'Canva 可画', url: 'https://www.canva.cn/', icon: '✏️', desc: '在线设计工具与模板' },
+          { name: '创客贴', url: 'https://www.chuangkit.com/', icon: '�️', desc: '国内在线设计模板' }
+        ],
+        'AI工具类': [
+          { name: 'Midjourney', url: 'https://www.midjourney.com/', icon: '🤖', desc: 'AI 绘画工具' },
+          { name: 'Stable Diffusion', url: 'https://stablediffusionweb.com/', icon: '🎨', desc: '开源 AI 绘画' },
+          { name: '通义万相', url: 'https://tongyi.aliyun.com/wanxiang/', icon: '✨', desc: '阿里 AI 创意绘画' },
+          { name: '文心一格', url: 'https://yige.baidu.com/', icon: '🖼️', desc: '百度 AI 绘画平台' }
+        ],
+        '黑科技': [
+          { name: 'Eagle', url: 'https://eagle.cool/', icon: '🦅', desc: '设计师素材管理工具' },
+          { name: '图片助手', url: 'https://www.pullywood.com/ImageAssistant/', icon: '🔍', desc: '网页图片批量提取插件' },
+          { name: '花瓣采集', url: 'https://huaban.com/about/goodies/', icon: '🧩', desc: '浏览器一键采集灵感插件' },
+          { name: 'uBlock Origin', url: 'https://ublockorigin.com/', icon: '🛡️', desc: '高效广告拦截浏览器插件' }
+        ]
+      },
+      keywordSource: 'shared',
+      managePassword: '',
+      passVerified: false,
+      showManage: false,
+      showAdd: false,
+      showAboutModal: false,
+      mgrCat: '',
+      mgrSelKw: '',
+      addKeywordText: '',
+      toast: { show: false, message: '', timer: null }
+    };
+  },
+
+  computed: {
+    filteredKeywords() {
+      if (!this.activeTab || !this.categories[this.activeTab]) return [];
+      const all = this.categories[this.activeTab].keywords;
+      const q = this.keywordSearch.trim().toLowerCase();
+      if (!q) return all;
+      return all.filter(k => k.toLowerCase().includes(q));
+    }
+  },
+
+  watch: {
+    showManage(v) {
+      document.body.style.overflow = v ? 'hidden' : '';
+      if (!v) this.loadCategories();
+    },
+    showAboutModal(v) {
+      document.body.style.overflow = v ? 'hidden' : '';
+    }
+  },
+
+  methods: {
+    async apiGet(p) { const r = await fetch(p); return r.json(); },
+    async apiPost(p, d) {
+      const r = await fetch(p, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+      return r.json();
+    },
+
+    toastMsg(m) {
+      clearTimeout(this.toast.timer);
+      this.toast.message = m; this.toast.show = true;
+      this.toast.timer = setTimeout(() => this.toast.show = false, 2000);
+    },
+
+    async loadCategories() {
+      this.categories = await this.apiGet('/api/categories');
+      if (!this.activeTab || !this.categories[this.activeTab])
+        this.activeTab = Object.keys(this.categories)[0] || '';
+      this.keywordSearch = '';
+      this.selectedPreviewTags = [];
+    },
+
+    togglePreviewTag(kw) {
+      const i = this.selectedPreviewTags.indexOf(kw);
+      if (i >= 0) this.selectedPreviewTags.splice(i, 1);
+      else this.selectedPreviewTags.push(kw);
+    },
+
+    // ====== 生成灵感 ======
+    async generate() {
+      this.rightPanelMode = 'default';
+      const p = { mode: this.currentMode };
+      if (this.currentMode === 'people') {
+        p.male_count = this.params.male;
+        p.female_count = this.params.female;
+        p.style_count = this.params.style;
+      } else {
+        p.era = this.currentEra;
+        p.material_count = this.params.material;
+        p.color_count = this.params.color;
+        if (this.currentEra === 'ancient') p.poem_count = this.params.poem;
+      }
+      const r = await this.apiPost('/api/generate', p);
+      if (r && r.title) {
+        this.results.push(r);
+        this.$nextTick(() => {
+          const b = this.$refs.resultBox;
+          if (b) b.scrollTop = b.scrollHeight;
+        });
+      }
+    },
+
+    clearResults() { this.results = []; },
+
+    async toggleKeywordSource() {
+      const newSource = this.keywordSource === 'shared' ? 'default' : 'shared';
+      const r = await this.apiPost('/api/keywords/switch_source', { source: newSource });
+      if (r.success) {
+        this.keywordSource = r.source;
+        await this.loadCategories();
+        this.toastMsg(newSource === 'default' ? '已加载默认词库' : '已加载共享词库');
+      } else {
+        this.toastMsg(r.message);
+      }
+    },
+
+    showAbout() { this.showAboutModal = true; },
+
+    showLinks() { this.rightPanelMode = 'links'; },
+
+    getFavicon(url) {
+      // 使用 Google favicon 服务获取网站图标
+      return 'https://www.google.com/s2/favicons?sz=48&domain_url=' + encodeURIComponent(url);
+    },
+
+    // ====== 管理弹窗 ======
+    async openManage() {
+      this.categories = await this.apiGet('/api/categories');
+      const keys = Object.keys(this.categories);
+      this.mgrCat = keys[0] || '';
+      this.mgrSelKw = '';
+      this.managePassword = '';
+      this.passVerified = false;
+      this.showManage = true;
+    },
+
+    async loadManageData() {
+      this.categories = await this.apiGet('/api/categories');
+      if (!this.categories[this.mgrCat]) this.mgrCat = Object.keys(this.categories)[0] || '';
+      this.mgrSelKw = '';
+    },
+
+    openAdd() {
+      if (!this.mgrCat) return;
+      this.addKeywordText = '';
+      this.showAdd = true;
+      this.$nextTick(() => { const inp = this.$refs.addInput; if (inp) inp.focus(); });
+    },
+
+    async confirmAdd() {
+      const kw = this.addKeywordText.trim();
+      if (!kw) return this.toastMsg('请输入词汇！');
+      const r = await this.apiPost('/api/keywords/add', { category: this.mgrCat, keyword: kw });
+      if (r.success) { this.toastMsg(r.message); this.showAdd = false; await this.loadManageData(); }
+      else this.toastMsg(r.message);
+    },
+
+    async deleteKw() {
+      if (!this.mgrCat || !this.mgrSelKw) return;
+      if (!this.passVerified) return this.toastMsg('请先输入管理密码验证删除权限！');
+      if (!confirm(`确定删除【${this.mgrSelKw}】吗？`)) return;
+      const r = await this.apiPost('/api/keywords/delete', {
+        category: this.mgrCat, keyword: this.mgrSelKw, password: this.managePassword
+      });
+      if (r.success) { this.toastMsg(r.message); this.mgrSelKw = ''; await this.loadManageData(); }
+      else { this.toastMsg(r.message); if (r.message.includes('密码')) { this.passVerified = false; this.managePassword = ''; } }
+    },
+
+    verifyPassword() {
+      if (!this.managePassword.trim()) return this.toastMsg('请输入管理密码！');
+      this.passVerified = true;
+    },
+
+    onKeydown(e) {
+      if (e.key === 'Escape') {
+        if (this.showAdd) { this.showAdd = false; return; }
+        if (this.showManage) { this.showManage = false; this.loadCategories(); return; }
+      }
+    }
+  },
+
+  mounted() {
+    this.loadCategories();
+    document.addEventListener('keydown', this.onKeydown);
+  },
+  beforeUnmount() {
+    document.removeEventListener('keydown', this.onKeydown);
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
