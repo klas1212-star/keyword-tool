@@ -122,7 +122,7 @@
         <div class="sidebar-card sidebar-card-flex">
           <div class="sidebar-card-title">词库管理</div>
           <div class="mgmt-btns">
-            <button class="mgmt-btn" @click="openManage">
+            <button class="mgmt-btn" @click="openManage" v-if="keywordSource === 'shared'">
               <span class="mgmt-btn-left">
                 <span class="mgmt-btn-icon green"><img src="/images/folder.png" alt=""></span>
                 <span>管理词库</span>
@@ -398,6 +398,10 @@
   </div>
 
   <div class="toast" :class="{ show: toast.show }">{{ toast.message }}</div>
+  <div class="loading-overlay" v-if="loading">
+    <div class="loading-spinner"></div>
+    <span>处理中...</span>
+  </div>
 </div>
 
 <script>
@@ -423,6 +427,7 @@ createApp({
       keywordSource: 'shared',
       showLinksPanel: false,
       showAnliPanel: false,
+      loading: false,
       linkSearchTerm: '',
       managePassword: '',
       passVerified: false,
@@ -561,13 +566,21 @@ createApp({
         if (this.currentEra === 'ancient') p.poem_count = this.params.poem;
       }
       this.showLinksPanel = false;
-      const r = await this.apiPost('/api/generate', p);
-      if (r && r.title) {
-        this.results.push(r);
-        this.$nextTick(() => {
-          const b = this.$refs.resultBox;
-          if (b) b.scrollTop = b.scrollHeight;
-        });
+      this.showAnliPanel = false;
+      this.loading = true;
+      try {
+        const r = await this.apiPost('/api/generate', p);
+        if (r && r.title) {
+          this.results.push(r);
+          this.$nextTick(() => {
+            const b = this.$refs.resultBox;
+            if (b) b.scrollTop = b.scrollHeight;
+          });
+        }
+      } catch(e) {
+        this.toastMsg('生成失败，请检查网络连接');
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -576,6 +589,7 @@ createApp({
     async rerollItem(result, item) {
       if (!item.category) return;
       const count = item.values.length;
+      this.loading = true;
       try {
         const r = await this.apiPost('/api/keywords/random', { category: item.category, count });
         if (r && r.keywords && r.keywords.length) {
@@ -588,18 +602,27 @@ createApp({
         }
       } catch(e) {
         this.toastMsg('重抽请求失败，请刷新页面后重试');
+      } finally {
+        this.loading = false;
       }
     },
 
     async toggleKeywordSource() {
       const newSource = this.keywordSource === 'shared' ? 'default' : 'shared';
-      const r = await this.apiPost('/api/keywords/switch_source', { source: newSource });
-      if (r.success) {
-        this.keywordSource = r.source;
-        await this.loadCategories();
-        this.toastMsg(newSource === 'default' ? '已加载默认词库' : '已加载共享词库');
-      } else {
-        this.toastMsg(r.message);
+      this.loading = true;
+      try {
+        const r = await this.apiPost('/api/keywords/switch_source', { source: newSource });
+        if (r.success) {
+          this.keywordSource = r.source;
+          await this.loadCategories();
+          this.toastMsg(newSource === 'default' ? '已加载默认词库' : '已加载共享词库');
+        } else {
+          this.toastMsg(r.message);
+        }
+      } catch(e) {
+        this.toastMsg('切换失败，请检查网络连接');
+      } finally {
+        this.loading = false;
       }
     },
 
